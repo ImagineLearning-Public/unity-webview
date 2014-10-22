@@ -37,14 +37,14 @@ public class SampleWebView : MonoBehaviour
 			status.animation.Play();
 		});
 		
-		webViewObject.SetMargins(5, 5, 5, 40);
+		webViewObject.SetMargins(20, 20, 20, 100);
 		webViewObject.SetVisibility(true);
 
 		switch (Application.platform) {
 		case RuntimePlatform.OSXEditor:
 		case RuntimePlatform.OSXPlayer:
 		case RuntimePlatform.IPhonePlayer:
-			webViewObject.LoadURL("file://" + Application.dataPath + "/WebPlayerTemplates/unity-webview/" + Url);
+			webViewObject.LoadURL(Url);
 			webViewObject.EvaluateJS(
 				"window.addEventListener('load', function() {" +
 				"	window.Unity = {" +
@@ -78,6 +78,9 @@ public class SampleWebView : MonoBehaviour
 				"		window.Unity.call('clicked');" +
 				"	});" +
 				"});");
+			break;
+		case RuntimePlatform.Android:
+			webViewObject.LoadURL(Url);
 			break;
 		}
 	}

@@ -228,13 +228,13 @@ public class WebViewObject : MonoBehaviour
 #if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_IPHONE
 		if (webView == IntPtr.Zero)
 			return;
-		_WebViewPlugin_LoadURL(webView, url);
+		_WebViewPlugin_LoadURL(webView, GetAbsoluteUrl(url));
 #elif UNITY_ANDROID
 		if (webView == null)
 			return;
-		webView.Call("LoadURL", url);
+		webView.Call("LoadURL", GetAbsoluteUrl(url));
 #elif UNITY_WEBPLAYER
-		Application.ExternalCall("unityWebView.loadURL", name, url);
+		Application.ExternalCall("unityWebView.loadURL", name, GetAbsoluteUrl(url));
 #endif
 	}
 
@@ -259,6 +259,22 @@ public class WebViewObject : MonoBehaviour
 			callback(message);
 	}
 
+	private string GetAbsoluteUrl(string url)
+	{
+		if (url.StartsWith("http://"))
+		{
+			return url;
+		}
+#if UNITY_WEBPLAYER
+		//Unity seems to have broken this in 4.5?
+		return Application.dataPath + "/StreamingAssets/" + url;
+#elif UNITY_ANDROID
+		return "file:///android_asset/" + url;
+#else
+		return Application.streamingAssetsPath + "/" +url;
+#endif
+	}
+	
 #if UNITY_EDITOR || UNITY_STANDALONE_OSX
 	void Update()
 	{
