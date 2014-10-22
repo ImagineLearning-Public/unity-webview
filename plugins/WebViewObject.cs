@@ -67,8 +67,10 @@ public class WebViewObject : MonoBehaviour
 		get {
 #if UNITY_ANDROID && !UNITY_EDITOR
 			return mIsKeyboardVisible;
-#else
+#elif UNITY_IPHONE
 			return TouchScreenKeyboard.visible;
+#else
+			return false;
 #endif
 		}
 	}
@@ -273,6 +275,49 @@ public class WebViewObject : MonoBehaviour
 #else
 		return Application.streamingAssetsPath + "/" +url;
 #endif
+	}
+
+	public void AddNecessaryJavascriptEvents()
+	{
+		switch (Application.platform)
+		{
+			case RuntimePlatform.OSXEditor:
+			case RuntimePlatform.OSXPlayer:
+			case RuntimePlatform.IPhonePlayer:
+				EvaluateJS(
+					"window.addEventListener('load', function() {" +
+					"	window.Unity = {" +
+					"		call:function(msg) {" +
+					"			var iframe = document.createElement('IFRAME');" +
+					"			iframe.setAttribute('src', 'unity:' + msg);" +
+					"			document.documentElement.appendChild(iframe);" +
+					"			iframe.parentNode.removeChild(iframe);" +
+					"			iframe = null;" +
+					"		}" +
+					"	}" +
+					"}, false);");
+				EvaluateJS(
+					"window.addEventListener('load', function() {" +
+					"	window.addEventListener('click', function() {" +
+					"		Unity.call('clicked');" +
+					"	}, false);" +
+					"}, false);");
+				break;
+			case RuntimePlatform.OSXWebPlayer:
+			case RuntimePlatform.WindowsWebPlayer:
+				EvaluateJS(
+					"parent.$(function() {" +
+					"	window.Unity = {" +
+					"		call:function(msg) {" +
+					"			parent.unityWebView.sendMessage('WebViewObject', msg)" +
+					"		}" +
+					"	};" +
+					"	parent.$(window).click(function() {" +
+					"		window.Unity.call('clicked');" +
+					"	});" +
+					"});");
+				break;
+		}
 	}
 	
 #if UNITY_EDITOR || UNITY_STANDALONE_OSX

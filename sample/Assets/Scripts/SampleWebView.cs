@@ -40,48 +40,7 @@ public class SampleWebView : MonoBehaviour
 		webViewObject.SetMargins(20, 20, 20, 100);
 		webViewObject.SetVisibility(true);
 
-		switch (Application.platform) {
-		case RuntimePlatform.OSXEditor:
-		case RuntimePlatform.OSXPlayer:
-		case RuntimePlatform.IPhonePlayer:
-			webViewObject.LoadURL(Url);
-			webViewObject.EvaluateJS(
-				"window.addEventListener('load', function() {" +
-				"	window.Unity = {" +
-				"		call:function(msg) {" +
-				"			var iframe = document.createElement('IFRAME');" +
-				"			iframe.setAttribute('src', 'unity:' + msg);" +
-				"			document.documentElement.appendChild(iframe);" +
-				"			iframe.parentNode.removeChild(iframe);" +
-				"			iframe = null;" +
-				"		}" +
-				"	}" +
-				"}, false);");
-			webViewObject.EvaluateJS(
-				"window.addEventListener('load', function() {" +
-				"	window.addEventListener('click', function() {" +
-				"		Unity.call('clicked');" +
-				"	}, false);" +
-				"}, false);");
-			break;
-		case RuntimePlatform.OSXWebPlayer:
-		case RuntimePlatform.WindowsWebPlayer:
-			webViewObject.LoadURL(Url);
-			webViewObject.EvaluateJS(
-				"parent.$(function() {" +
-				"	window.Unity = {" +
-				"		call:function(msg) {" +
-				"			parent.unityWebView.sendMessage('WebViewObject', msg)" +
-				"		}" +
-				"	};" +
-				"	parent.$(window).click(function() {" +
-				"		window.Unity.call('clicked');" +
-				"	});" +
-				"});");
-			break;
-		case RuntimePlatform.Android:
-			webViewObject.LoadURL(Url);
-			break;
-		}
+		webViewObject.LoadURL(Url);
+		webViewObject.AddNecessaryJavascriptEvents();
 	}
 }
